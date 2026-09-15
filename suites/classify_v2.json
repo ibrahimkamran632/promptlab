@@ -1,0 +1,115 @@
+{
+  "name": "classify-v2",
+  "description": "Regression suite for the optimized classify_v2 prompt. Exercises equals, contains, not_contains, matches, max_tokens, and finish_is assertions.",
+  "prompt": "prompts/classify_v2.txt",
+  "data": "data/tickets.json",
+  "runs_per_input": 3,
+  "temperature": 0.0,
+  "seed": 42,
+  "max_tokens": 16,
+  "timeout": 30,
+  "pass_rate_threshold": 0.9,
+  "pricing": {
+    "prompt_per_token": 0.00003,
+    "completion_per_token": 0.00006
+  },
+  "tests": [
+    {
+      "id": "classify-billing-001",
+      "data_index": 0,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "billing"
+        },
+        {
+          "type": "contains",
+          "field": "output",
+          "value": "ill"
+        },
+        {
+          "type": "not_contains",
+          "field": "output",
+          "value": "mystery"
+        },
+        {
+          "type": "matches",
+          "field": "output",
+          "value": "^(billing|technical|account|other)$"
+        },
+        {
+          "type": "max_tokens",
+          "value": 16
+        },
+        {
+          "type": "finish_is",
+          "value": "stop"
+        }
+      ]
+    },
+    {
+      "id": "classify-technical-002",
+      "data_index": 1,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "technical"
+        },
+        {
+          "type": "max_tokens",
+          "value": 16
+        },
+        {
+          "type": "finish_is",
+          "value": "stop"
+        }
+      ]
+    },
+    {
+      "id": "classify-account-003",
+      "data_index": 2,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "account"
+        }
+      ]
+    },
+    {
+      "id": "classify-billing-004",
+      "data_index": 3,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "billing"
+        }
+      ]
+    },
+    {
+      "id": "classify-technical-005",
+      "data_index": 4,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "technical"
+        }
+      ]
+    },
+    {
+      "id": "classify-account-006",
+      "data_index": 5,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "account"
+        }
+      ]
+    }
+  ]
+}

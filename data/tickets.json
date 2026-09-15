@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ticket-001",
+    "text": "My credit card was charged twice for the same subscription this month.",
+    "category": "billing"
+  },
+  {
+    "id": "ticket-002",
+    "text": "The login page keeps returning a 500 error after I type my password.",
+    "category": "technical"
+  },
+  {
+    "id": "ticket-003",
+    "text": "I need to update the email address associated with my account.",
+    "category": "account"
+  },
+  {
+    "id": "ticket-004",
+    "text": "How do I cancel my plan?",
+    "category": "billing"
+  },
+  {
+    "id": "ticket-005",
+    "text": "The export feature does not include the last row of my report.",
+    "category": "technical"
+  },
+  {
+    "id": "ticket-006",
+    "text": "I forgot my password and need to reset it.",
+    "category": "account"
+  }
+]

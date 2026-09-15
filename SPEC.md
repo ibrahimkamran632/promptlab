@@ -40,15 +40,22 @@ PromptLab is a CLI harness for testing, comparing, and validating LLM prompt pip
 ```
 promptlab/
 ├── SPEC.md                 # This specification
+├── promptlab.py            # CLI harness (run / compare / doctor)
 ├── stubmodel.py            # LLM simulator (subprocess target)
 ├── prompts/
-│   └── classify_v1.txt     # Prompt templates ({input} placeholder)
+│   ├── classify_v1.txt     # Weak baseline prompt ({input} placeholder)
+│   └── classify_v2.txt     # Optimized prompt (JSON contract + few-shots)
 ├── data/
 │   └── tickets.json        # Test data with ground truth
 ├── suites/
-│   └── smoke.json          # Test suite definitions
+│   ├── smoke.json          # Baseline suite (classify_v1, weak by design)
+│   └── classify_v2.json    # Regression suite (classify_v2, 0.97+)
 ├── instructor/             # Human-facing lesson materials
-└── tests/                  # Python unit tests for the harness
+├── tests/
+│   ├── __init__.py
+│   └── test_promptlab.py   # unittest suite for the harness
+├── results/                # doctor output directory (created on demand)
+└── *.md                    # USAGE.md, PROMPTS.md, CLAUDE.md, IMPROVEMENT.md, JOURNAL.md
 ```
 
 **`prompts/`** contains plain-text prompt templates. The token `{input}` is replaced at runtime with the test input value.
@@ -57,9 +64,14 @@ promptlab/
 
 **`suites/`** contains JSON suite files that bind a prompt, dataset, model configuration, and assertion list.
 
+> **Path resolution:** `prompt`, `data`, and `model` entries in a suite are resolved
+> relative to the directory you run `promptlab` from (normally the repository
+> root). Absolute paths are used as-is.
+
 **`instructor/`** holds pedagogical materials (READMEs, walkthroughs, grading rubrics). Not consumed by the harness.
 
-**`tests/`** holds Python `unittest` or `pytest` files that validate the harness itself.
+**`tests/`** holds Python `unittest` files that validate the harness itself.
+Run them with `python -m unittest discover -s tests -v`.
 
 ---
 
@@ -115,9 +127,9 @@ python promptlab.py compare \
 **Behavior:**
 
 1. Run each suite independently via the `run` logic
-2. Compute the selected metric for each suite
+2. Compute the selected metric for each suite (baseline = first suite)
 3. Print a comparison table to stdout
-4. Exit with code 1 if any suite regresses below `--threshold`; otherwise exit 0
+4. Exit with code 1 if any suite regresses below `--threshold`; code 2 if any suite has failed tests but no regression; otherwise exit 0
 
 ### `promptlab doctor`
 
@@ -444,23 +456,31 @@ PromptLab uses distinct exit codes to enable CI/CD pipeline integration:
 
 | Code | Meaning | Description |
 |------|---------|-------------|
-| **0** | All tests passed | Every assertion in every test passed. No flaky tests, or all flaky tests met the pass-rate threshold. |
-| **1** | One or more tests failed | At least one test failed all runs, or a flaky test fell below the pass-rate threshold. |
-| **2** | Flaky tests detected | All tests passed the threshold, but at least one test exhibited flakiness (mixed pass/fail across runs). This signals "green but fragile." |
-| **3** | Configuration or input error | The suite JSON is malformed, a prompt file is missing, a data_index is out of range, or the model binary is not executable. |
-| **4** | Harness internal error | An unexpected exception occurred within the harness itself (e.g., JSON decode failure of model output, subprocess timeout, file I/O error). |
+| **0** | All tests passed | Every assertion in every test passed. Flaky tests at or above the pass-rate threshold are acceptable. |
+| **1** | Bad usage or malformed suite | Invalid CLI arguments, malformed suite JSON, unknown assertion types, or missing required schema keys. |
+| **2** | One or more test cases failed | At least one test fell below the pass-rate threshold or failed all runs. |
+| **3** | Model error | The model binary exited non-zero, timed out, or produced unparseable output. |
+| **4** | Unreadable file or harness error | A required file (suite, data, prompt) is missing/unreadable, or an unexpected internal error occurred. |
 
-**Decision tree:**
+**Decision tree (run):**
 
 ```
-config_error?            -> exit 3
-internal_error?          -> exit 4
-any test failed?         -> exit 1
-any test flaky?          -> exit 2
-all tests pass clean?    -> exit 0
+config_error (usage / malformed suite)?  → exit 1
+file unreadable?                         → exit 4
+model_error?                             → exit 3
+any test failed?                         → exit 2
+all tests pass clean?                    → exit 0
 ```
 
-**`promptlab doctor` uses only codes 0 and 1.**
+**Compare exits:**
+
+```
+any suite has regression below threshold?  → exit 1
+any suite has failed tests?                → exit 2
+all suites clean?                          → exit 0
+```
+
+**`promptlab doctor` uses only codes 0 (all checks passed) and 1 (any check failed).**
 
 ---
 
@@ -532,6 +552,15 @@ For each run, the following fields are appended:
 - Verify deterministic output with fixed seed
 - Verify non-deterministic behavior with varying temperature/seed
 - Verify flakiness detection with synthetic multi-run scenarios
+
+---
+
+## Changelog
+
+| Version | Date | Change |
+|---------|------|--------|
+| 0.1.0 | 2026-09-15 | Initial specification |
+| 0.2.0 | 2026-09-15 | Exit codes realigned to the student brief (0/1/2/3/4 as all-pass / usage / failed / model / file); compare exit behavior defined; suite paths resolved relative to the working directory; added `classify_v2`, `promptlab.py`, tests, and documentation references |
 
 ---
 

@@ -1,0 +1,90 @@
+{
+  "name": "classify-smoke",
+  "description": "Smoke test for the classify_v1 prompt across all six sample tickets.",
+  "prompt": "prompts/classify_v1.txt",
+  "data": "data/tickets.json",
+  "runs_per_input": 3,
+  "temperature": 0.0,
+  "seed": 42,
+  "max_tokens": 16,
+  "pricing": {
+    "prompt_per_token": 0.00003,
+    "completion_per_token": 0.00006
+  },
+  "tests": [
+    {
+      "id": "classify-billing-001",
+      "data_index": 0,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "billing"
+        },
+        {
+          "type": "max_tokens",
+          "value": 16
+        },
+        {
+          "type": "finish_is",
+          "value": "stop"
+        }
+      ]
+    },
+    {
+      "id": "classify-technical-002",
+      "data_index": 1,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "technical"
+        }
+      ]
+    },
+    {
+      "id": "classify-account-003",
+      "data_index": 2,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "account"
+        }
+      ]
+    },
+    {
+      "id": "classify-billing-004",
+      "data_index": 3,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "billing"
+        }
+      ]
+    },
+    {
+      "id": "classify-technical-005",
+      "data_index": 4,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "technical"
+        }
+      ]
+    },
+    {
+      "id": "classify-account-006",
+      "data_index": 5,
+      "assertions": [
+        {
+          "type": "equals",
+          "field": "output",
+          "value": "account"
+        }
+      ]
+    }
+  ]
+}
